@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASHOKA FLC QUIZ COMPETITION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        :root { --primary-blue: #004275; --light-background: #edf4f9; --light-border: #d2dee6; --input-border: #bfd0dc; --white-card-background: rgba(255, 255, 255, 0.95); --dark-text: #17211b; --input-bg: rgba(255, 255, 255, 0.86); --positive-color: #148a4f; --negative-color: #d64545; --accent-glow: rgba(0, 66, 117, 0.18); }
+        .dark { --white-card-background: rgba(18, 18, 18, 0.95); --dark-text: #f4f4f5; --light-background: #121212; --light-border: rgba(255, 255, 255, 0.15); --input-bg: rgba(30, 30, 30, 0.9); --input-border: #3f3f46; --primary-blue: #60a5fa; --accent-glow: rgba(59, 130, 246, 0.25); }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, rgba(0, 66, 117, 0.12), transparent 30%), var(--light-background); color: var(--dark-text); margin: 0; padding: 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; transition: background-color 0.2s ease, color 0.2s ease; }
+        .dark body { background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent 30%), var(--light-background); }
+        .container { width: 98%; max-width: 1100px; background-color: var(--white-card-background); backdrop-filter: blur(18px); border: 1px solid rgba(255, 255, 255, 0.72); box-shadow: 0 20px 50px rgba(23, 33, 27, 0.12); padding: 1.5rem 2rem; border-radius: 16px; margin-top: 3.5rem; }
+        .dark .container { border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); }
+        .auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; position: absolute; top: 0; left: 0; z-index: 1000; }
+        .auth-card { background-color: var(--white-card-background); backdrop-filter: blur(12px); padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.75); box-shadow: 0 20px 60px rgba(23, 33, 27, 0.15); width: 100%; max-width: 420px; text-align: center; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.4rem; color: var(--dark-text); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; }
+        .form-group input { width: 100%; padding: 10px 14px; border: 1px solid var(--input-border); border-radius: 10px; font-size: 0.95rem; font-weight: 500; background-color: var(--input-bg); color: var(--dark-text); }
+        .form-group input:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .auth-button { width: 100%; padding: 12px; background-color: var(--primary-blue); color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .top-bar { position: absolute; top: 0.75rem; left: 1rem; right: 1rem; display: flex; justify-content: space-between; align-items: center; z-index: 100; padding: 0.5rem 1rem; border: 1px solid rgba(255, 255, 255, 0.72); border-radius: 12px; background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(16px); }
+        .dark .top-bar { background: rgba(0, 0, 0, 0.85); border-color: rgba(255, 255, 255, 0.15); }
+        .nav-button { background-color: var(--white-card-background); color: var(--dark-text); border: 1px solid var(--light-border); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+        .nav-button.active { background-color: var(--primary-blue); color: #ffffff; border-color: var(--primary-blue); }
+        .quiz-card { background-color: var(--white-card-background); border: 1px solid rgba(221, 230, 223, 0.9); border-radius: 14px; padding: 1.25rem 1.5rem; }
+        .dark .quiz-card { border-color: rgba(255, 255, 255, 0.1); }
+        .option-btn { background-color: var(--light-background); border: 1px solid var(--light-border); padding: 10px 14px; border-radius: 10px; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s; color: var(--dark-text); font-size: 0.95rem; }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary-blue); background-color: var(--accent-glow); }
+        .option-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-btn.correct { background-color: var(--positive-color) !important; color: white !important; border-color: var(--positive-color) !important; }
+        .option-btn.wrong { background-color: var(--negative-color) !important; color: white !important; border-color: var(--negative-color) !important; }
+    </style>
+</head>
+<body class="transition-colors duration-200">
+
+    <div id="top-bar" class="top-bar hidden">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/50 dark:bg-black/50 px-3 py-1 rounded-lg border border-gray-200 dark:border-zinc-700 text-xs font-semibold flex items-center gap-2">
+                <img src="assets/icon.ico" alt="App Icon" onerror="this.src='assets/icon.ico'" class="h-5 w-5 rounded-full">
+                <div>User: <span id="user-id-display-text" class="text-[#004275] dark:text-blue-400"></span></div>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button id="tab-quiz" class="nav-button active" onclick="switchTab('quiz')">Take Quiz</button>
+            <button id="tab-analytics" class="nav-button" onclick="switchTab('analytics')">My Analytics</button>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="toggleTheme()" class="nav-button">🌓 Theme</button>
+            <button onclick="handleLogout()" class="nav-button bg-red-500 text-white border-red-500">Logout</button>
+        </div>
+    </div>
+
+    <!-- Login & Register Modal -->
+    <div id="login-page" class="auth-container">
+        <button onclick="toggleTheme()" class="absolute top-4 right-4 nav-button">🌓 Toggle Theme</button>
+        <div class="auth-card">
+            <h2 id="auth-title" class="text-2xl font-extrabold text-[#004275] dark:text-blue-400 mb-1">Welcome Back!</h2>
+            <p id="auth-subtitle" class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-4">Log in to track your financial literacy progress</p>
+            <div class="form-group"><label>Username</label><input type="text" id="login-username" placeholder="Enter username"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="Enter password"></div>
+            <button id="auth-action-btn" onclick="handleAuthAction()" class="auth-button mb-3">Sign In</button>
+            <p id="auth-error" class="text-red-500 text-xs font-semibold mb-3 hidden"></p>
+        </div>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quiz-section" class="container hidden">
+        <h1 class="text-2xl font-bold text-[#004275] dark:text-blue-400 mb-4 text-center">Ashoka Financial Literacy Quiz</h1>
+        
+        <div id="start-screen" class="flex flex-col items-center justify-center py-6">
+            <button onclick="startNewQuiz()" class="nav-button bg-yellow-400 text-black border-yellow-400 font-bold hover:bg-yellow-500 text-lg px-10 py-3 rounded-xl shadow-lg">Start Quiz</button>
+        </div>
+
+        <!-- Section Transition Screen -->
+        <div id="section-transition" class="quiz-card hidden max-w-2xl mx-auto text-center py-10 border-4 border-yellow-400">
+            <h2 class="text-lg font-bold text-gray-500 mb-2 uppercase tracking-widest">Entering Next Phase</h2>
+            <h1 id="transition-title" class="text-3xl font-extrabold text-[#004275] dark:text-blue-400 mb-4">Section Name</h1>
+            
+            <div id="transition-countdown-container" class="hidden mb-6">
+                <p class="text-lg font-semibold text-gray-600 dark:text-gray-300">Starting automatically in <br><span id="transition-timer" class="text-6xl font-extrabold text-red-500 my-2 inline-block">30</span><br> seconds</p>
+            </div>
+
+            <button id="start-section-btn" onclick="showQuestion()" class="nav-button bg-blue-600 text-white border-blue-600 font-bold hover:bg-blue-700 text-lg px-8 py-3 shadow-lg">Start Section</button>
+        </div>
+
+        <!-- Active Quiz Screen -->
+        <div id="active-quiz" class="quiz-card hidden max-w-4xl mx-auto">
+            <div class="flex flex-wrap justify-between items-center mb-3 pb-2 border-b dark:border-zinc-700 gap-2">
+                <span id="question-tracker" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-lg dark:bg-blue-900 dark:text-blue-300">Question 1 of X</span>
+                <span id="team-indicator" class="bg-indigo-600 text-white text-xs font-extrabold px-3 py-1 rounded-lg shadow-sm tracking-wider">TEAM 1</span>
+                <span id="timer-display" class="font-extrabold text-red-500 text-xl tracking-wider">⏳ 15s</span>
+                <span class="font-bold text-sm bg-green-100 text-green-800 px-3 py-1 rounded-lg dark:bg-green-900 dark:text-green-300">Score: <span id="current-score">0</span></span>
+            </div>
+            
+            <div class="flex justify-between items-center mb-2">
+                <h2 id="section-title" class="text-xs font-bold text-gray-500 uppercase tracking-widest"></h2>
+            </div>
+            
+            <div id="media-container" class="w-full hidden mb-3 flex justify-center max-h-80 overflow-hidden"></div>
+            <h3 id="question-text" class="text-lg font-bold mb-4 leading-snug">Loading question...</h3>
+            
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+            <div id="action-area" class="mt-4 text-center pt-2">
+                <button id="show-explanation-btn" onclick="revealExplanation()" class="hidden nav-button bg-purple-600 hover:bg-purple-700 text-white border-purple-600 font-bold px-6 py-2.5 text-base w-full md:w-auto shadow-md">🔍 Show Correct Answer & Explanation</button>
+                <button id="next-btn" onclick="nextQuestion()" class="hidden nav-button bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold px-6 py-2.5 text-base w-full md:w-auto shadow-md">Next Question →</button>
+            </div>
+
+            <div id="explanation-box" class="hidden mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-left text-sm">
+                <h4 class="font-extrabold text-blue-900 dark:text-blue-300 mb-1">Answer & Detailed Explanation</h4>
+                <p id="explanation-text" class="text-blue-900 dark:text-blue-200 leading-relaxed font-medium"></p>
+            </div>
+
+            <!-- NEW: HOST OVERRIDE CONTROLS -->
+            <div class="flex justify-between mt-6 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <button onclick="goToPrevious()" class="text-xs font-bold text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 uppercase tracking-wider px-3 py-2 rounded transition-colors bg-gray-50 dark:bg-zinc-800/50">◀ Previous Q</button>
+                <button onclick="goToNext()" class="text-xs font-bold text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 uppercase tracking-wider px-3 py-2 rounded transition-colors bg-gray-50 dark:bg-zinc-800/50">Skip Q ▶</button>
+            </div>
+        </div>
+
+        <div id="quiz-complete" class="quiz-card hidden max-w-2xl mx-auto text-center py-8">
+            <h2 class="text-3xl font-extrabold text-[#004275] dark:text-blue-400 mb-3">Quiz Complete!</h2>
+            <p class="text-xl font-bold mb-6">Final Score: <span id="final-score" class="text-green-600">0</span> Points</p>
+            <p id="save-status" class="text-gray-500 mb-6 text-sm"></p>
+            <button onclick="switchTab('analytics')" class="nav-button bg-yellow-400 text-black border-yellow-400 font-bold hover:bg-yellow-500 text-base px-6 py-2.5">View Detailed Analytics</button>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard -->
+    <div id="analytics-section" class="container hidden">
+        <div class="flex justify-between items-center mb-4 mt-1">
+            <h1 class="text-2xl font-bold text-[#004275] dark:text-blue-400">Your Analytics Dashboard</h1>
+            <button onclick="downloadCSV()" class="nav-button bg-green-600 text-white border-green-600 hover:bg-green-700 font-bold px-4 py-1.5 text-sm">📊 Export CSV</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-1">
+            <div class="quiz-card text-center py-3"><p class="text-xs font-bold text-gray-500 uppercase">Total Quizzes Taken</p><p id="stat-total-quizzes" class="text-2xl font-extrabold text-[#004275] dark:text-blue-400 mt-1">0</p></div>
+            <div class="quiz-card text-center py-3"><p class="text-xs font-bold text-gray-500 uppercase">Average Score</p><p id="stat-avg-score" class="text-2xl font-extrabold text-green-600 dark:text-green-400 mt-1">0 pts</p></div>
+        </div>
+        <div class="overflow-x-auto bg-white dark:bg-[#18181b] rounded-xl border border-gray-200 dark:border-zinc-700 max-h-64 overflow-y-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-gray-50 dark:bg-zinc-800 sticky top-0"><tr class="border-b border-gray-200 dark:border-zinc-700 text-gray-500 uppercase text-[10px]"><th class="p-3">Date & Time</th><th class="p-3">Total Score</th><th class="p-3">Action</th></tr></thead>
+                <tbody id="analytics-table-body" class="divide-y divide-gray-100 dark:divide-zinc-800 font-medium"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Floating Logo -->
+    <img src="assets/aus_black.png" alt="Ashoka Universal School" class="fixed bottom-4 right-6 h-12 z-[1000] pointer-events-none" onerror="this.style.display='none'">
+
+    <script>
+        const API_URL = (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === "null") 
+            ? "http://127.0.0.1:16005" 
+            : window.location.origin;
+
+        let timerInterval;
+        let transitionInterval; 
+        let timeLeft = 15; 
+        let currentQuestionNumber = 0;
+        let totalQuestions = 0;
+        let score = 0;
+        let currentUserId = "";
+        let isRegisterMode = false;
+        
+        let quizQuestions = []; 
+        let currentQuestionData = null; 
+        let currentQuizDetails = [];    
+        let currentScoresData = []; 
+        let currentSectionTitle = "";
+        let pendingExplanationText = "";
+
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
+        async function handleAuthAction() {
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            const errEl = document.getElementById('auth-error');
+            
+            if(!user || !pass) { errEl.textContent = "Please fill in all fields."; errEl.classList.remove('hidden'); return; }
+            const endpoint = isRegisterMode ? "/api/register" : "/api/login";
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass }) });
+                if (res.ok) {
+                    if(isRegisterMode) { alert("Account created successfully! Please sign in."); toggleAuthMode(); return; }
+                    currentUserId = user;
+                    document.getElementById('user-id-display-text').textContent = user;
+                    document.getElementById('login-page').style.display = 'none';
+                    document.body.style.alignItems = 'flex-start';
+                    document.getElementById('top-bar').classList.remove('hidden');
+                    switchTab('quiz');
+                } else {
+                    const data = await res.json();
+                    errEl.textContent = data.error || "Authentication failed.";
+                    errEl.classList.remove('hidden');
+                }
+            } catch (e) { errEl.textContent = "Cannot connect to server."; errEl.classList.remove('hidden'); }
+        }
+
+        function handleLogout() {
+            clearInterval(timerInterval);
+            clearInterval(transitionInterval);
+            currentUserId = "";
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('top-bar').classList.add('hidden');
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('analytics-section').classList.add('hidden');
+            document.getElementById('login-page').style.display = 'flex';
+            document.body.style.alignItems = 'center';
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('analytics-section').classList.add('hidden');
+            document.getElementById('tab-quiz').classList.remove('active');
+            document.getElementById('tab-analytics').classList.remove('active');
+            document.getElementById(`${tabId}-section`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            if (tabId === 'analytics') { loadAnalytics(); } 
+            else if (tabId === 'quiz') {
+                document.getElementById('start-screen').classList.remove('hidden');
+                document.getElementById('section-transition').classList.add('hidden');
+                document.getElementById('active-quiz').classList.add('hidden');
+                document.getElementById('quiz-complete').classList.add('hidden');
+            }
+        }
+
+        async function startNewQuiz() {
+            score = 0;
+            currentQuestionNumber = 0;
+            currentQuizDetails = []; 
+            currentSectionTitle = "";
+            document.getElementById('current-score').textContent = "0";
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-complete').classList.add('hidden');
+            
+            try {
+                let response = await fetch(`${API_URL}/api/questions?t=${Date.now()}`);
+                if (!response.ok) {
+                    response = await fetch(`${API_URL}/questions.json?t=${Date.now()}`);
+                }
+                if (!response.ok) { throw new Error(`HTTP Error ${response.status}`); }
+                quizQuestions = await response.json();
+                totalQuestions = quizQuestions.length; 
+                if(totalQuestions === 0) { throw new Error("JSON file is empty."); }
+                nextQuestion();
+            } catch (error) {
+                alert("Error Loading Quiz: " + error.message);
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionNumber++;
+            if (currentQuestionNumber > totalQuestions) { return finishQuiz(); }
+            
+            clearInterval(timerInterval);
+            
+            const nextData = quizQuestions[currentQuestionNumber - 1];
+            let upcomingSection = nextData.section || "Quiz Challenge";
+            
+            if (upcomingSection !== currentSectionTitle) {
+                currentSectionTitle = upcomingSection;
+                document.getElementById('active-quiz').classList.add('hidden');
+                document.getElementById('section-transition').classList.remove('hidden');
+                document.getElementById('transition-title').textContent = currentSectionTitle;
+                
+                if (currentQuestionNumber > 1) {
+                    document.getElementById('transition-countdown-container').classList.remove('hidden');
+                    document.getElementById('start-section-btn').textContent = "Skip Wait & Start Now";
+                    
+                    let waitTime = 30;
+                    document.getElementById('transition-timer').textContent = waitTime;
+                    
+                    clearInterval(transitionInterval);
+                    transitionInterval = setInterval(() => {
+                        waitTime--;
+                        document.getElementById('transition-timer').textContent = waitTime;
+                        if (waitTime <= 0) { clearInterval(transitionInterval); showQuestion(); }
+                    }, 1000);
+                } else {
+                    document.getElementById('transition-countdown-container').classList.add('hidden');
+                    document.getElementById('start-section-btn').textContent = "Start Section";
+                }
+            } else {
+                showQuestion();
+            }
+        }
+
+        window.showQuestion = function() {
+            clearInterval(transitionInterval); 
+            document.getElementById('section-transition').classList.add('hidden');
+            document.getElementById('active-quiz').classList.remove('hidden');
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('explanation-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            
+            currentQuestionData = quizQuestions[currentQuestionNumber - 1];
+            timeLeft = currentQuestionData.timeLimit || 15;
+            
+            document.getElementById('question-tracker').textContent = `Question ${currentQuestionNumber} of ${totalQuestions}`;
+            document.getElementById('timer-display').textContent = `⏳ ${timeLeft}s`;
+            
+            let teamNumber = ((currentQuestionNumber - 1) % 6) + 1;
+            document.getElementById('team-indicator').textContent = `TEAM ${teamNumber}`;
+            
+            if (currentQuestionData.type === 'text') {
+                document.getElementById('show-explanation-btn').classList.remove('hidden');
+                document.getElementById('show-explanation-btn').textContent = "🔍 Show Correct Answer & Explanation";
+            } else {
+                document.getElementById('show-explanation-btn').classList.add('hidden');
+            }
+
+            if (currentQuestionNumber === totalQuestions) {
+                document.getElementById('next-btn').textContent = "Finish Quiz & Save Score";
+                document.getElementById('next-btn').classList.replace("bg-blue-600", "bg-green-600");
+                document.getElementById('next-btn').classList.replace("border-blue-600", "border-green-600");
+            } else {
+                document.getElementById('next-btn').textContent = "Next Question →";
+                document.getElementById('next-btn').classList.replace("bg-green-600", "bg-blue-600");
+                document.getElementById('next-btn').classList.replace("border-green-600", "border-blue-600");
+            }
+            
+            renderQuestion(currentQuestionData);
+            startTimer();
+        };
+
+        function renderQuestion(data) {
+            document.getElementById('section-title').textContent = data.section || "General Knowledge";
+            document.getElementById('question-text').textContent = data.question;
+            const mediaContainer = document.getElementById('media-container');
+            const optionsContainer = document.getElementById('options-container');
+            
+            mediaContainer.innerHTML = '';
+            if (data.image && data.image !== "") {
+                mediaContainer.innerHTML = `<img src="${data.image}" alt="Question Media" class="max-h-80 object-contain rounded-lg border border-gray-200 dark:border-zinc-700 w-auto">`;
+                mediaContainer.classList.remove('hidden');
+            } else if (data.video && data.video !== "") {
+                mediaContainer.innerHTML = `<video src="${data.video}" controls class="max-h-36 rounded-lg border border-gray-200 dark:border-zinc-700 bg-black"></video>`;
+                mediaContainer.classList.remove('hidden');
+            } else {
+                mediaContainer.classList.add('hidden');
+            }
+
+            optionsContainer.innerHTML = '';
+            
+            if (data.type === 'mcq' || !data.type) {
+                optionsContainer.className = data.options.length === 2 ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 md:grid-cols-2 gap-2';
+                data.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn p-3';
+                    btn.textContent = opt;
+                    btn.onclick = () => handleAnswer(btn, index === data.correctIndex);
+                    optionsContainer.appendChild(btn);
+                });
+            } else if (data.type === 'text') {
+                optionsContainer.className = 'w-full text-center py-2';
+                optionsContainer.innerHTML = `<p class="text-xs font-bold text-gray-400 uppercase tracking-widest">[ Flashcard Mode — No Input Required ]</p>`;
+            }
+        }
+
+        function startTimer() {
+            document.getElementById('timer-display').textContent = `⏳ ${timeLeft}s`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').textContent = `⏳ ${timeLeft}s`;
+                if (timeLeft <= 0) { clearInterval(timerInterval); handleTimeUp(); }
+            }, 1000);
+        }
+
+        function handleAnswer(selectedBtn, isCorrect) {
+            clearInterval(timerInterval);
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+            
+            selectedBtn.classList.add(isCorrect ? 'correct' : 'wrong');
+            const correctText = currentQuestionData.options[currentQuestionData.correctIndex];
+            
+            if (isCorrect) {
+                score += currentQuestionData.points || 1;
+                document.getElementById('current-score').textContent = score;
+            }
+            
+            pendingExplanationText = `The correct answer is: ${correctText}.\n\n${currentQuestionData.explanation}`;
+            document.getElementById('show-explanation-btn').classList.remove('hidden');
+            
+            currentQuizDetails.push({ questionText: currentQuestionData.question, userAnswer: selectedBtn.textContent, correctAnswer: correctText, isCorrect: isCorrect, timeLeft: timeLeft });
+        }
+
+        function handleTimeUp() {
+            clearInterval(timerInterval);
+            let correctText = "";
+            
+            if (currentQuestionData.type === 'text') {
+                correctText = currentQuestionData.acceptedAnswers ? currentQuestionData.acceptedAnswers[0].toUpperCase() : "";
+            } else {
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(b => { b.disabled = true; b.classList.add('wrong'); });
+                correctText = currentQuestionData.options[currentQuestionData.correctIndex];
+            }
+            
+            pendingExplanationText = `Time Expired! The correct answer is: ${correctText}.\n\n${currentQuestionData.explanation}`;
+            document.getElementById('show-explanation-btn').classList.remove('hidden');
+            
+            currentQuizDetails.push({ questionText: currentQuestionData.question, userAnswer: "Time Expired", correctAnswer: correctText, isCorrect: false, timeLeft: 0 });
+        }
+
+        window.revealExplanation = function() {
+            clearInterval(timerInterval); 
+            document.getElementById('show-explanation-btn').classList.add('hidden');
+            
+            let displayAnswer = "";
+            if (currentQuestionData.type === 'text') {
+                displayAnswer = currentQuestionData.acceptedAnswers ? currentQuestionData.acceptedAnswers[0].toUpperCase() : "";
+                pendingExplanationText = `Correct Answer: ${displayAnswer}\n\n${currentQuestionData.explanation}`;
+            }
+            
+            document.getElementById('explanation-text').innerHTML = pendingExplanationText.replace(/\n\n/g, '<br><br>');
+            document.getElementById('explanation-box').classList.remove('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+        };
+
+        // NEW: HOST CONTROLS
+        window.goToPrevious = function() {
+            if (currentQuestionNumber > 1) {
+                clearInterval(timerInterval);
+                clearInterval(transitionInterval);
+                
+                // Jump back 2 spots because nextQuestion() automatically adds 1
+                currentQuestionNumber -= 2; 
+                
+                // Remove the answers we just undid from the analytics array
+                currentQuizDetails = currentQuizDetails.slice(0, Math.max(0, currentQuestionNumber));
+                
+                // If we went back across a section boundary, make sure the title resets 
+                // so the transition screen triggers backwards!
+                if(currentQuestionNumber > 0 && quizQuestions[currentQuestionNumber - 1]) {
+                    currentSectionTitle = quizQuestions[currentQuestionNumber - 1].section || "Quiz Challenge";
+                } else {
+                    currentSectionTitle = "";
+                }
+                
+                nextQuestion();
+            }
+        };
+
+        window.goToNext = function() {
+            clearInterval(timerInterval);
+            clearInterval(transitionInterval);
+            
+            // Push a placeholder into analytics so your CSV doesn't break
+            if(quizQuestions[currentQuestionNumber - 1]) {
+                currentQuizDetails.push({ 
+                    questionText: quizQuestions[currentQuestionNumber - 1].question, 
+                    userAnswer: "SKIPPED BY HOST", 
+                    correctAnswer: "", 
+                    isCorrect: false, 
+                    timeLeft: 0 
+                });
+            }
+            nextQuestion();
+        };
+
+        async function finishQuiz() {
+            document.getElementById('active-quiz').classList.add('hidden');
+            document.getElementById('quiz-complete').classList.remove('hidden');
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('save-status').textContent = "Saving performance analytics...";
+
+            const scoreData = { username: currentUserId, score: score, total: totalQuestions, date: new Date().toLocaleString(), details: currentQuizDetails };
+            try {
+                await fetch(`${API_URL}/api/score`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(scoreData) });
+                document.getElementById('save-status').textContent = "Analytics saved successfully!";
+            } catch (e) { document.getElementById('save-status').textContent = "Notice: Could not reach backend to save."; }
+        }
+
+        window.toggleDetails = function(idx) { document.getElementById(`details-${idx}`).classList.toggle('hidden'); };
+
+        async function loadAnalytics() {
+            const tableBody = document.getElementById('analytics-table-body');
+            tableBody.innerHTML = '<tr><td colspan="3" class="py-4 text-center">Loading analytics...</td></tr>';
+            try {
+                const response = await fetch(`${API_URL}/api/scores?user=${currentUserId}&t=${Date.now()}`, { cache: "no-store" });
+                const scores = await response.json();
+                currentScoresData = scores; 
+                
+                if (scores.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="3" class="py-4 text-center text-gray-500">Take your first quiz to see analytics!</td></tr>';
+                    document.getElementById('stat-total-quizzes').textContent = "0";
+                    document.getElementById('stat-avg-score').textContent = "0 pts";
+                    return;
+                }
+
+                document.getElementById('stat-total-quizzes').textContent = scores.length;
+                let totalPoints = scores.reduce((sum, s) => sum + s.score, 0);
+                let avg = Math.round(totalPoints / scores.length);
+                document.getElementById('stat-avg-score').textContent = `${avg} pts`;
+
+                tableBody.innerHTML = scores.map((s, idx) => `
+                    <tr class="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/55 transition-colors"><td class="p-3 whitespace-nowrap text-xs">${s.date}</td><td class="p-3 font-bold text-sm text-green-600">${s.score} Points</td><td class="p-3"><button onclick="toggleDetails(${idx})" class="text-xs font-bold bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded transition-colors border border-blue-200">View ▼</button></td></tr>
+                    <tr id="details-${idx}" class="hidden bg-gray-50 dark:bg-zinc-900/40"><td colspan="3" class="p-3 border-b border-gray-200 dark:border-zinc-700">${s.details ? s.details.map((d, qIdx) => `<div class="mb-2 last:mb-0 p-2 bg-white dark:bg-black rounded border border-gray-200 dark:border-zinc-800 text-xs"><p class="font-bold mb-1">${qIdx + 1}.${d.questionText}</p><p>Answered: <span class="font-bold ${d.isCorrect ? 'text-green-600' : 'text-red-500'}">${d.userAnswer}</span></p>${!d.isCorrect && d.correctAnswer ? `<p class="mt-0.5 text-purple-700 dark:text-purple-400 font-semibold">Correct: ${d.correctAnswer}</p>` : ''}</div>`).join('') : '<p class="text-xs text-gray-500 italic p-1">No detailed data available.</p>'}</td></tr>
+                `).join('');
+            } catch(e) { tableBody.innerHTML = '<tr><td colspan="3" class="py-3 text-center text-red-500">Error loading data.</td></tr>'; }
+        }
+
+        function downloadCSV() {
+            if (!currentScoresData || currentScoresData.length === 0) { alert("No data available to export!"); return; }
+            let csvContent = "Date & Time,Student Username,Total Score,Question Number,Question Text,Selected Answer,Result\n";
+            currentScoresData.forEach(s => {
+                if (s.details && s.details.length > 0) {
+                    s.details.forEach((d, index) => {
+                        let safeQText = `"${d.questionText.replace(/"/g, '""')}"`;
+                        let safeAns = `"${d.userAnswer.replace(/"/g, '""')}"`;
+                        let resultStatus = d.isCorrect ? "Correct" : "Incorrect";
+                        csvContent += `"${s.date}","${s.username}",${s.score},Q${index + 1},${safeQText},${safeAns},"${resultStatus}"\n`;
+                    });
+                }
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `FinLit_Report_${currentUserId}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
